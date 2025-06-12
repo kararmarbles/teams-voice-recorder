@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teams Voice Recorder</title>
+</head>
+<body>
+  <h2>🎤 Voice Recorder for Teams</h2>
+
+  <button id="startBtn">Start Recording</button>
+  <button id="stopBtn" disabled>Stop Recording</button>
+  <br><br>
+  <audio id="audioPlayback" controls></audio>
+
+  <script>
+    let mediaRecorder;
+    let chunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = e => {
+        chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const audioURL = URL.createObjectURL(blob);
+        document.getElementById("audioPlayback").src = audioURL;
+        // Save blob to variable here for upload in next step
+      };
+
+      document.getElementById("startBtn").onclick = () => {
+        chunks = [];
+        mediaRecorder.start();
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = false;
+      };
+
+      document.getElementById("stopBtn").onclick = () => {
+        mediaRecorder.stop();
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("stopBtn").disabled = true;
+      };
+    }).catch(err => {
+      alert('Mic access denied or not supported!');
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
